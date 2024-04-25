@@ -1,27 +1,13 @@
+const { signup, login } = require("../controller/user.controller");
+const jwt = require("../middleware/jwt");
+const express = require("express");
 
-const {signup,login} = require('../controller/user.controller');
-const jwt = require('../middleware/jwt')
-const {countEverything} = require('../services/all-entries')
-const express = require('express')
+const userRoutes = express.Router();
 
-const userRoutes = express.Router()
+userRoutes.route("/login").post(login);
 
-userRoutes
-    .route('/login')
-    .post(login)
+userRoutes.route("/signup").post(signup);
 
-userRoutes
-    .route('/signup')
-    .post(signup)
-
-userRoutes
-    .route('/authenticate')
-    .get(jwt.authGuard)
-
-userRoutes
-    .route('/count')
-    .get(jwt.verifyAdmin,countEverything)
-
-
+userRoutes.route("/authenticate").get(jwt.authGuard);
 
 module.exports = userRoutes;

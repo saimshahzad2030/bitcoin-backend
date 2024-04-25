@@ -1,8 +1,5 @@
 const bcrypt = require("bcrypt");
-
-const User = require("../model/user.model");
 const jwt = require("../middleware/jwt");
-const BlockedUser = require("../model/blocked-user.model");
 const catchAsync = require("..//utils/catch-async");
 const supabase = require("../db/db");
 const signup = async (req, res) => {

@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET_KEY } = require("../config/config");
-const userModel = require("../model/user.model");
 const supabase = require("../db/db");
 const jwtConfig = {
   sign(payload) {

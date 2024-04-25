@@ -1,8 +1,6 @@
-const User = require("../model/user.model");
-const Token = require("../model/token.model");
+
 const generateToken = require("../services/generate-token");
 const sendEmail = require("../services/send-email");
-const catchAsync = require("..//utils/catch-async");
 const supabase = require("../db/db");
 const verificationEmailController = async (req, res) => {
   try {

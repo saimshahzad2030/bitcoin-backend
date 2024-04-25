@@ -1,4 +1,3 @@
-const Token = require("../model/token.model");
 
 const catchAsync = require("..//utils/catch-async");
 const supabase = require("../db/db");
