@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET_KEY } = require("../config/config");
 const userModel = require("../model/user.model");
-
+const supabase = require("../db/db");
 const jwtConfig = {
   sign(payload) {
     const token = jwt.sign(payload, JWT_SECRET_KEY);
@@ -36,24 +36,31 @@ const jwtConfig = {
     try {
       if (authHeader) {
         const [bearer, token] = authHeader.split(" ");
-
         jwt.verify(token, JWT_SECRET_KEY, async function (err, decoded) {
-          const user = await userModel.findOne({ email: decoded.user.email });
+          const { data: user, error: selectionError } = await supabase
+            .from("Users")
+            .select("*")
+            .eq("email", decoded?.user?.email);
           if (err) {
-            throw new Error("You aresdsds not authorized");
+            return res.status(520).json({ message: "You are not authorized" });
+          }
+          if (user.length === 0) {
+            return res.status(520).json({ message: "You are not authorized" });
           } else {
             res.status(200).json({
               message: "User Authorized",
-              role: user.role,
-              status: user.status,
-              name: user.name,
+              role: user[0].role,
+              status: user[0].status,
+              name: user[0].name,
             });
+            console.log("user", user);
           }
         });
       } else {
         throw new Error("Something Went Wrong");
       }
     } catch (error) {
+      console.log("error", error);
       res.status(520).send(error.message);
     }
   },
