@@ -44,7 +44,7 @@ const tokenRoutes = require("./src/routes/token.routes");
 const foodRoutes = require("./src/routes/food.routes");
 const { fetchFoods } = require("./src/controller/foods.controller");
 const paymentRoutes = require("./src/routes/payment.routes");
-const { STRIPE_SECRET } = require("./src/config/config");
+const { STRIPE_SECRET, WEBHOOK_KEY } = require("./src/config/config");
 const bodyParser = require("body-parser");
 const stripe = require("stripe")(STRIPE_SECRET);
 const supabase = require("./src/db/db");
@@ -78,11 +78,7 @@ app.post("/webhook", async (req, res) => {
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(
-      req.rawBody,
-      sig,
-      "whsec_QG2tFpQPxUWlebbDenk98y3x1ufOHyjD"
-    );
+    event = stripe.webhooks.constructEvent(req.rawBody, sig, WEBHOOK_KEY);
   } catch (err) {
     console.error("Error verifying webhook signature:", err);
     return res.status(400).send(`Webhook Error: ${err.message}`);
