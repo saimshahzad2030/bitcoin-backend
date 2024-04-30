@@ -55,7 +55,13 @@ const { fetchFoodsApi } = require("./src/controller/foods.controller");
 const app = express();
 app.use(cors());
 
-app.use(bodyParser.json());
+app.use(
+  bodyParser.json({
+    verify: (req, res, buf) => {
+      req.rawBody = buf;
+    },
+  })
+);
 
 app.use(express.json());
 
@@ -73,7 +79,7 @@ app.post("/webhook", async (req, res) => {
 
   try {
     event = stripe.webhooks.constructEvent(
-      req.body,
+      req.rawBody,
       sig,
       "whsec_QG2tFpQPxUWlebbDenk98y3x1ufOHyjD"
     );
@@ -89,21 +95,6 @@ app.post("/webhook", async (req, res) => {
       .from("Users")
       .update({ status: "approved" }) // Replace "new_status" with the desired status value
       .eq("email", customerEmail); // Condition to identify the user to update
-
-    if (updateError) {
-      throw updateError;
-    }
-  }
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object;
-    const subscriptionId = session.subscription;
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-
-    if (subscription.status === "active") {
-      console.log("Subscription is active:", subscription);
-    } else {
-      console.log("Subscription is not active:", subscription);
-    }
   }
 
   res.json({ received: true });
