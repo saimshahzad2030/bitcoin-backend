@@ -69,9 +69,13 @@ const jwtConfig = {
     try {
       if (authHeader) {
         const [bearer, token] = authHeader.split(" ");
-        const decoded = await userModel.find({ email: token.user.email });
-        jwt.verify(token, JWT_SECRET_KEY, function (err, decoded) {
-          // console.log(decoded.user)
+        // const decoded = await userModel.find({ email: token.user.email });
+
+        jwt.verify(token, JWT_SECRET_KEY, async function (err, decoded) {
+          await supabase
+            .from("Users")
+            .select("*")
+            .eq("email", decoded?.user?.email);
           if (err) {
             res.status(401).json({ message: "You are not authorized" });
           } else if (decoded.user.role !== "admin") {

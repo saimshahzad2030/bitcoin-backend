@@ -84,6 +84,8 @@ const login = async (req, res) => {
         res.status(200).json({
           message: "login successful",
           token,
+          email,
+          name: existingData[0].name,
           role: existingData[0].role,
         });
       } else {
@@ -107,4 +109,36 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { login, signup };
+const adminReset = async (req, res) => {
+  try {
+    const { email, password, name } = req.body;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!email || !password || !name) {
+      return res.status(404).json({ message: "all fields required" });
+    }
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+    const hashPaswd = await bcrypt.hash(password, 10);
+
+    const { data: updatedUser, error: updateError } = await supabase
+      .from("Users")
+      .update({ name: name, password: hashPaswd }) // Replace "new_status" with the desired status value
+      .eq("email", email);
+    const { data: adminData, error: selectionError } = await supabase
+      .from("Users")
+      .select("*")
+      .eq("email", email); // Check if a record with the same name already exists
+    res
+      .status(200)
+      .json({ user: adminData, message: "Admin updated successfully" });
+  } catch (error) {
+    console.error("Error connecting to Supabase:", error.message);
+    res.status(520).json({
+      message: "something went wrong",
+    });
+  }
+};
+
+module.exports = { login, signup, adminReset };
