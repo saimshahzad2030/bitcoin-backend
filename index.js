@@ -34,6 +34,49 @@
 // fetchFoods();
 // app.listen(PORT, () => console.log(`Server runing at PORT ${PORT}`));
 
+//crytop api
+const CoinpaprikaAPI = require("@coinpaprika/api-nodejs-client");
+
+const client = new CoinpaprikaAPI();
+
+// client.getTicker().then(console.log).catch(console.error);
+// client.getGlobal().then(console.log).catch(console.error);
+// client.getCoins().then(console.log).catch(console.error);
+// client
+//   .getCoinsOHLCVHistorical({
+//     coinId: "btc-bitcoin",
+//     quote: "usd",
+//     start: "2023-01-01",
+//     end: "2023-01-02",
+//   })
+//   .then(console.log)
+//   .catch(console.error);
+
+// client
+//   .getTicker({ coinId: "btc-bitcoin" })
+//   .then(console.log)
+//   .catch(console.error);
+
+// client
+//   .getAllTickers({
+//     coinId: "btc-bitcoin",
+//     quotes: ["BTC", "ETH"],
+//   })
+//   .then(console.log)
+//   .catch(console.error);
+
+// client
+//   .getCoinsOHLCVHistorical({
+//     coinId: "btc-bitcoin",
+//     quote: "usd",
+//     start: "2023-01-01",
+//     end: "2023-01-02",
+//   })
+//   .then(console.log)
+//   .catch(console.error);
+
+//crytop api
+
 const express = require("express");
 const cors = require("cors");
 
@@ -52,6 +95,10 @@ const bodyParser = require("body-parser");
 const stripe = require("stripe")(STRIPE_SECRET);
 const supabase = require("./src/db/db");
 const { fetchFoodsApi } = require("./src/controller/foods.controller");
+const {
+  fetchSingleCoin,
+  fetchAllCoins,
+} = require("./src/controller/Cryptop-Api.controller");
 
 const app = express();
 app.use(cors());
@@ -63,7 +110,8 @@ app.use(
     },
   })
 );
-
+app.get("/fetchSingleCoin", fetchSingleCoin);
+app.get("/fetchAllCoins", fetchAllCoins);
 app.use(express.json());
 
 app.use("/api", routerUser);

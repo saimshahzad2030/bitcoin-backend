@@ -30,7 +30,7 @@ const auth = new google.auth.GoogleAuth({
 const fetchData = async (req, res) => {
   const sheets = google.sheets({ version: "v4", auth });
   const spreadsheetId = SPREADSHEET_ID;
-  const range = `Sheet1!A3:A`;
+  const range = `Sheet1!T3:T`;
   try {
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
@@ -76,7 +76,7 @@ const fetchsingleCoinController = async (req, res) => {
 
     // Get the properties of the coin
     const coinProperties = values[coinRow].slice(1); // Assuming properties start from the second column
-    console.log(coinProperties);
+
     console.log(values[0]);
     const coinDetails = {
       name: coin,
