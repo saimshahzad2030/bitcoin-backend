@@ -110,8 +110,8 @@ app.use(
     },
   })
 );
-app.get("/fetchSingleCoin", fetchSingleCoin);
-app.get("/fetchAllCoins", fetchAllCoins);
+app.get("/api/fetchSingleCoin", fetchSingleCoin);
+app.get("/api/fetchAllCoins", fetchAllCoins);
 app.use(express.json());
 
 app.use("/api", routerUser);
