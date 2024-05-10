@@ -8,7 +8,7 @@ const subscribeController = async (req, res) => {
     payment_method_types: ["card"],
     line_items: lineitems,
     mode: "subscription",
-    success_url: `${CLIENT_URL}/user/home`,
+    success_url: `${CLIENT_URL}/user/calculator`,
     cancel_url: `${CLIENT_URL}/user/home`,
     billing_address_collection: "auto",
     customer_email: req?.user?.user?.email ? req?.user?.user?.email : undefined,
