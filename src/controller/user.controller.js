@@ -108,7 +108,42 @@ const login = async (req, res) => {
     });
   }
 };
+const changePasswordController = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+    if (!email || !password) {
+      return res.status(404).json({ message: "all fields required" });
+    }
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+    const hashPaswd = await bcrypt.hash(password, 10);
+    const { data: updatedUser, error: updateError } = await supabase
+      .from("Users")
+      .update({ password: hashPaswd })
+      .eq("email", email);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    const { data: existingData, error: selectionError } = await supabase
+      .from("Users")
+      .select("*")
+      .eq("email", email);
+
+    return res.status(200).json({
+      newUser: existingData,
+      role: "user",
+      message: "Password Succesfully updated",
+    });
+  } catch (error) {
+    console.error("Error connecting to Supabase:", error.message);
+    res.status(520).send("Error connecting to Supabase:", error.message);
+  }
+};
 const adminReset = async (req, res) => {
   try {
     const { email, password, name } = req.body;
@@ -141,4 +176,4 @@ const adminReset = async (req, res) => {
   }
 };
 
-module.exports = { login, signup, adminReset };
+module.exports = { login, signup, adminReset, changePasswordController };

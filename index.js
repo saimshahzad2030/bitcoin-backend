@@ -139,8 +139,8 @@ app.post("/webhook", async (req, res) => {
     const customerEmail = event.data.object.customer_email;
     const { data: updatedUser, error: updateError } = await supabase
       .from("Users")
-      .update({ status: "approved" }) // Replace "new_status" with the desired status value
-      .eq("email", customerEmail); // Condition to identify the user to update
+      .update({ status: "approved" }) 
+      .eq("email", customerEmail);
   }
 
   res.json({ received: true });

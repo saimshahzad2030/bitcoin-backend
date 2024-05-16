@@ -1,4 +1,3 @@
-
 const generateToken = require("../services/generate-token");
 const sendEmail = require("../services/send-email");
 const supabase = require("../db/db");
@@ -40,5 +39,46 @@ const verificationEmailController = async (req, res) => {
     });
   }
 };
+const changePassVerificationEmailController = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      res.status(401).json({ message: "Enter Email" });
+      return;
+    }
+    const { data: emailalreadyExist, error: selectionError } = await supabase
+      .from("Users")
+      .select("*")
+      .eq("email", email);
 
-module.exports = verificationEmailController;
+    if (emailalreadyExist.length > 0) {
+      const verificationToken = generateToken();
+      const { data, error: selectError } = await supabase
+        .from("Tokens")
+        .insert([{ email, token: verificationToken }]);
+
+      if (selectError) {
+        throw selectError;
+      }
+
+      await sendEmail(
+        email,
+        (subject = "Email Verification"),
+        (message = `${verificationToken} is your verification Token`)
+      );
+
+      res.status(200).json({ email, message: `Email sent to ${email}` });
+    } else {
+      return res.status(401).json({ message: "No such email exist" });
+    }
+  } catch (error) {
+    console.error("Error connecting to Supabase:", error.message);
+    res.status(520).json({
+      message: error.message,
+    });
+  }
+};
+module.exports = {
+  verificationEmailController,
+  changePassVerificationEmailController,
+};
