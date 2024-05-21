@@ -108,7 +108,7 @@ const login = async (req, res) => {
     });
   }
 };
-const changePasswordController = async (req, res) => {
+const forgetPasswordController = async (req, res) => {
   try {
     const { email, password } = req.body;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -144,6 +144,91 @@ const changePasswordController = async (req, res) => {
     res.status(520).send("Error connecting to Supabase:", error.message);
   }
 };
+const updateNameController = async (req, res) => {
+  try {
+    const { email, name } = req.body;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!email || !name) {
+      return res.status(404).json({ message: "all fields required" });
+    }
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+    const { data: updatedUser, error: updateError } = await supabase
+      .from("Users")
+      .update({ name: name })
+      .eq("email", email);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    const { data: existingData, error: selectionError } = await supabase
+      .from("Users")
+      .select("*")
+      .eq("email", email);
+
+    return res.status(200).json({
+      newUser: existingData,
+      role: "user",
+      message: "Name Succesfully updated",
+    });
+  } catch (error) {
+    console.error("Error connecting to Supabase:", error.message);
+    res.status(520).send("Error connecting to Supabase:", error.message);
+  }
+};
+const updatePasswordController = async (req, res) => {
+  try {
+    const { email, password, newPassword } = req.body;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!email || !password || !newPassword) {
+      return res.status(404).json({ message: "all fields required" });
+    }
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+    const hashPaswd = await bcrypt.hash(newPassword, 10);
+    const { data, error: fetchError } = await supabase
+      .from("Users")
+      .select("*")
+      .eq("email", email);
+    const isPaswd = await bcrypt.compare(password, data[0].password);
+    if (fetchError) {
+      console.log("fetchError:", fetchError);
+      throw fetchError;
+    }
+    if (!isPaswd) {
+      return res.status(401).json({ message: "wrong credentials" });
+    }
+
+    const { data: updateUser, error: updateError } = await supabase
+      .from("Users")
+      .update({ password: hashPaswd })
+      .eq("email", email);
+
+    if (updateError) {
+      console.log("updateError:", updateError);
+
+      throw updateError;
+    }
+    const { data: existingData, error: selectionError } = await supabase
+      .from("Users")
+      .select("*")
+      .eq("email", email);
+
+    return res.status(200).json({
+      newUser: existingData,
+      role: "user",
+      message: "Password Succesfully updated",
+    });
+  } catch (error) {
+    console.error("Error connecting to Supabase:", error);
+    res.status(520).send("Error connecting to Supabase:", error);
+  }
+};
 const adminReset = async (req, res) => {
   try {
     const { email, password, name } = req.body;
@@ -176,4 +261,11 @@ const adminReset = async (req, res) => {
   }
 };
 
-module.exports = { login, signup, adminReset, changePasswordController };
+module.exports = {
+  login,
+  signup,
+  adminReset,
+  forgetPasswordController,
+  updatePasswordController,
+  updateNameController,
+};
