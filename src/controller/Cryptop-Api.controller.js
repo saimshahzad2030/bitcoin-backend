@@ -226,7 +226,8 @@ const fetchAllCoins = async (req, res) => {
         offset: "0",
       },
       headers: {
-        "X-RapidAPI-Key": "ed54dfe28dmsh8fa15132e454773p12efc1jsn492a55fb9af3",
+        // "X-RapidAPI-Key": "ed54dfe28dmsh8fa15132e454773p12efc1jsn492a55fb9af3",
+        "X-RapidAPI-Key": "2b5a1b5831msha68a8cd101775fap18e5dfjsn1490691b2258",
         "X-RapidAPI-Host": "coinranking1.p.rapidapi.com",
       },
     };

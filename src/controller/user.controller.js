@@ -17,7 +17,7 @@ const signup = async (req, res) => {
     const { data: existingData, error: selectionError } = await supabase
       .from("Users")
       .select("*")
-      .eq("email", email); // Check if a record with the same name already exists
+      .eq("email", email);
 
     if (selectionError) {
       throw selectionError;
