@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 
-const sendEmail = async (userEmail, subject, message, req, res) => {
+const sendEmail = async (userEmail, subject, message) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {

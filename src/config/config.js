@@ -18,6 +18,7 @@ const AUTH_PROVIDE_X509_CERT_URL = process.env.AUTH_PROVIDE_X509_CERT_URL;
 const CLIENT_X509_CERT_URL = process.env.CLIENT_X509_CERT_URL;
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
 const SCOPES = process.env.SCOPES;
+const GOLD_ID = process.env.GOLD_ID;
 module.exports = {
   JWT_SECRET_KEY,
   PORT,
@@ -38,4 +39,5 @@ module.exports = {
   CLIENT_X509_CERT_URL,
   SPREADSHEET_ID,
   SCOPES,
+  GOLD_ID,
 };

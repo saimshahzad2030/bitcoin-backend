@@ -99,6 +99,7 @@ const {
   fetchSingleCoin,
   fetchAllCoins,
 } = require("./src/controller/Cryptop-Api.controller");
+const sendEmail = require("./src/services/send-email");
 
 const app = express();
 app.use(cors());
@@ -139,10 +140,17 @@ app.post("/webhook", async (req, res) => {
     const customerEmail = event.data.object.customer_email;
     const { data: updatedUser, error: updateError } = await supabase
       .from("Users")
-      .update({ status: "approved" }) 
+      .update({ status: "approved" })
       .eq("email", customerEmail);
   }
-
+  if (event.type === "subscription_schedule.expiring") {
+    const customerEmail = event.data.object.customer_email;
+    await sendEmail(
+      customerEmail,
+      (subject = "Subscription ending Reminder"),
+      (message = `your currently subscribed offer is expiring within 7 days use our features to maximize your productivity and don't forget to resubscribe our offfer when it ends :)`)
+    );
+  }
   res.json({ received: true });
 });
 fetchFoods();
