@@ -60,11 +60,11 @@ app.post("/webhook", async (req, res) => {
     console.log("Checkout session completed:", event.data.object);
   }
   if (event.type === "customer.subscription.created") {
-    const customerEmail = event.data.object.customer_email;
-
     const subscription = event.data.object;
     const customerId = subscription.customer;
     const planId = subscription.plan.id;
+    const customer = await stripe.customers.retrieve(customerId);
+    const customerEmail = customer.email;
     await supabase
       .from("Users")
       .update({ status: "approved" })
