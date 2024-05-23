@@ -3,7 +3,7 @@ const cors = require("cors");
 
 require("dotenv").config();
 
-const { PORT } = require("./src/config/config");
+const { PORT, FREE_TRIAL_ID } = require("./src/config/config");
 const routerUser = require("./src/routes/user.routes");
 const emailRoutes = require("./src/routes/email.routes");
 const tokenRoutes = require("./src/routes/token.routes");
@@ -65,12 +65,15 @@ app.post("/webhook", async (req, res) => {
       .eq("email", customerEmail);
   }
   if (event.type === "customer.subscription.created") {
+    const customerEmail = event.data.object.customer_email;
+
     const subscription = event.data.object;
     const customerId = subscription.customer;
     const planId = subscription.plan.id;
     await supabase
-      .from("IceCream")
-      .insert([{ name: customerId, price: subscription.plan.id }]);
+      .from("Users")
+      .update({ freeTrialSubscribed: subscription.plan.id === FREE_TRIAL_ID })
+      .eq("email", customerEmail);
   }
   if (event.type === "subscription_schedule.expiring") {
     const customerEmail = event.data.object.customer_email;
