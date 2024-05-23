@@ -98,7 +98,7 @@ app.post("/webhook", async (req, res) => {
     const today = new Date();
     const oneDayBeforeExpiry = new Date(event.data.object.expires_at);
     oneDayBeforeExpiry.setDate(oneDayBeforeExpiry.getDate() - 1);
-    if (today < oneDayBeforeExpiry) {
+    if (today >= oneDayBeforeExpiry) {
       await sendEmail(
         customerEmail,
         (subject = "Subscription ending Reminder"),
