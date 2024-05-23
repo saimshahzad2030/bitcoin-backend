@@ -211,7 +211,6 @@ const updatePasswordController = async (req, res) => {
 
     if (updateError) {
       console.log("updateError:", updateError);
-
       throw updateError;
     }
     const { data: existingData, error: selectionError } = await supabase
@@ -223,6 +222,24 @@ const updatePasswordController = async (req, res) => {
       newUser: existingData,
       role: "user",
       message: "Password Succesfully updated",
+    });
+  } catch (error) {
+    console.error("Error connecting to Supabase:", error);
+    res.status(520).send("Error connecting to Supabase:", error);
+  }
+};
+const fetchUserDetails = async (req, res) => {
+  try {
+    const email = req?.user?.user?.email;
+
+    const { data: existingData, error: selectionError } = await supabase
+      .from("Users")
+      .select("*")
+      .eq("email", email);
+
+    return res.status(200).json({
+      user: existingData,
+      message: "User Fetched",
     });
   } catch (error) {
     console.error("Error connecting to Supabase:", error);
@@ -268,4 +285,5 @@ module.exports = {
   forgetPasswordController,
   updatePasswordController,
   updateNameController,
+  fetchUserDetails,
 };
