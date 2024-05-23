@@ -58,11 +58,6 @@ app.post("/webhook", async (req, res) => {
 
   if (event.type === "checkout.session.completed") {
     console.log("Checkout session completed:", event.data.object);
-    const customerEmail = event.data.object.customer_email;
-    const { data: updatedUser, error: updateError } = await supabase
-      .from("Users")
-      .update({ status: "approved" })
-      .eq("email", customerEmail);
   }
   if (event.type === "customer.subscription.created") {
     const customerEmail = event.data.object.customer_email;
@@ -70,6 +65,10 @@ app.post("/webhook", async (req, res) => {
     const subscription = event.data.object;
     const customerId = subscription.customer;
     const planId = subscription.plan.id;
+    await supabase
+      .from("Users")
+      .update({ status: "approved" })
+      .eq("email", customerEmail);
     await supabase
       .from("Users")
       .update({ freeTrialSubscribed: true })
