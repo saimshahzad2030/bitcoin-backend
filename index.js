@@ -59,20 +59,18 @@ app.post("/webhook", async (req, res) => {
   if (event.type === "checkout.session.completed") {
     console.log("Checkout session completed:", event.data.object);
     const customerEmail = event.data.object.customer_email;
-    // const lineItems = event.data.object.display_items;
-
-    // const productId = lineItems[0].price.product;
-
-    // const product = await stripe.products.retrieve(productId);
-    // console.log("Product Name:", product.name);
-    // const { data, error } = await supabase
-    //   .from("Foods")
-    //   .update({ juice_name: product.name })
-    //   .eq(juice_name, "banana juice");
     const { data: updatedUser, error: updateError } = await supabase
       .from("Users")
       .update({ status: "approved" })
       .eq("email", customerEmail);
+  }
+  if (event.type === "customer.subscription.created") {
+    const subscription = event.data.object;
+    const customerId = subscription.customer;
+    // const planId = subscription.plan.id;
+    await supabase
+      .from("IceCream")
+      .insert([{ name: customerId, price: customerId }]);
   }
   if (event.type === "subscription_schedule.expiring") {
     const customerEmail = event.data.object.customer_email;
