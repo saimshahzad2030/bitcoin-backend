@@ -19,6 +19,9 @@ const CLIENT_X509_CERT_URL = process.env.CLIENT_X509_CERT_URL;
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
 const SCOPES = process.env.SCOPES;
 const FREE_TRIAL_ID = process.env.FREE_TRIAL_ID;
+const GOLD_ID = process.env.GOLD_ID;
+const SILVER_ID = process.env.SILVER_ID;
+const BRONZE_ID = process.env.BRONZE_ID;
 module.exports = {
   JWT_SECRET_KEY,
   PORT,
@@ -40,4 +43,7 @@ module.exports = {
   SPREADSHEET_ID,
   SCOPES,
   FREE_TRIAL_ID,
+  GOLD_ID,
+  SILVER_ID,
+  BRONZE_ID,
 };

@@ -3,7 +3,13 @@ const cors = require("cors");
 
 require("dotenv").config();
 
-const { PORT, FREE_TRIAL_ID } = require("./src/config/config");
+const {
+  PORT,
+  FREE_TRIAL_ID,
+  GOLD_ID,
+  SILVER_ID,
+  BRONZE_ID,
+} = require("./src/config/config");
 const routerUser = require("./src/routes/user.routes");
 const emailRoutes = require("./src/routes/email.routes");
 const tokenRoutes = require("./src/routes/token.routes");
@@ -44,6 +50,13 @@ app.use("/api", foodRoutes);
 app.use("/api", paymentRoutes);
 
 app.get("/", fetchFoodsApi);
+
+const matcher = {
+  [FREE_TRIAL_ID]: "Free Trial",
+  [GOLD_ID]: "Gold",
+  [SILVER_ID]: "Silver",
+  [BRONZE_ID]: "Bronze",
+};
 app.post("/webhook", async (req, res) => {
   const sig = req.headers["stripe-signature"];
 
@@ -63,8 +76,6 @@ app.post("/webhook", async (req, res) => {
     const subscription = event.data.object;
     const customerId = subscription.customer;
     const planId = subscription.plan.id;
-    const product = await stripe.products.retrieve(planId);
-    const productName = product.name;
     const customer = await stripe.customers.retrieve(customerId);
     const customerEmail = customer.email;
     await supabase
@@ -77,7 +88,7 @@ app.post("/webhook", async (req, res) => {
       .eq("email", customerEmail);
     await sendEmail(
       customerEmail,
-      (subject = `${productName} Subscription Added`),
+      (subject = `${matcher[planId]} Subscription Added`),
       (message = `Dear User you have subscribed `)
     );
   }
