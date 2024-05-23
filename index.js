@@ -67,10 +67,10 @@ app.post("/webhook", async (req, res) => {
   if (event.type === "customer.subscription.created") {
     const subscription = event.data.object;
     const customerId = subscription.customer;
-    // const planId = subscription.plan.id;
+    const planId = subscription.plan.id;
     await supabase
       .from("IceCream")
-      .insert([{ name: customerId, price: customerId }]);
+      .insert([{ name: customerId, price: subscription.plan.id }]);
   }
   if (event.type === "subscription_schedule.expiring") {
     const customerEmail = event.data.object.customer_email;
