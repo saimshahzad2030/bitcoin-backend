@@ -15,14 +15,6 @@ const subscribeController = async (req, res) => {
     billing_address_collection: "auto",
     customer_email: req?.user?.user?.email ? req?.user?.user?.email : undefined,
   });
-  //  // const subscriptions = await stripe.subscriptions.list({});
-  // const customers = await stripe.customers.list({});
-  // console.log("subscriptions", subscriptions.data[0]);
-
-  // const cust = { name: "saim" };
-  // const abc = { saim: "123" };
-  // console.log(abc[cust.name]);
-
   res.json({ id: session.id });
 };
 
@@ -30,12 +22,8 @@ const fetchRemainingTime = async (req, res) => {
   try {
     const customers = await stripe.customers.list({
       email: req?.user?.user?.email,
-      // email: "saimshehzad2040@gmail.com",
     });
     const anySubscription = await hasSubscription(customers?.data[0]?.id);
-    // console.log("anySubscription", anySubscription.exist);
-    // console.log("Subscriptions", anySubscription.subscriptions);
-    // console.log("subscribed product: ", anySubscription.product.name);
 
     if (
       anySubscription.exist &&
@@ -49,7 +37,7 @@ const fetchRemainingTime = async (req, res) => {
       const date = new Date(upcomingInvoice.period_end * 1000);
       return res.status(200).json({
         date,
-        message: `Dear ${req?.user?.user?.name}, you have subscribed ${anySubscription.product.name} plan `,
+        subscription: anySubscription.product.name,
       });
     } else {
       return res
