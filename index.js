@@ -71,7 +71,7 @@ app.post("/webhook", async (req, res) => {
       .eq("email", customerEmail);
     await supabase
       .from("Users")
-      .update({ freeTrialSubscribed: true })
+      .update({ freeTrialSubscribed: planId === FREE_TRIAL_ID })
       .eq("email", customerEmail);
   }
   if (event.type === "subscription_schedule.expiring") {
