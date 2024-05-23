@@ -89,7 +89,7 @@ app.post("/webhook", async (req, res) => {
     await sendEmail(
       customerEmail,
       (subject = `${matcher[planId]} Subscription Added`),
-      (message = `Dear User you have subscribed `)
+      (message = `Dear User you have subscribed ${matcher[planId]} plan Subscription `)
     );
   }
   if (event.type === "subscription_schedule.expiring") {
