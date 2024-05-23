@@ -63,7 +63,8 @@ app.post("/webhook", async (req, res) => {
     const subscription = event.data.object;
     const customerId = subscription.customer;
     const planId = subscription.plan.id;
-    const productName = subscription.plan.product;
+    const product = await stripe.products.retrieve(planId);
+    const productName = product.name;
     const customer = await stripe.customers.retrieve(customerId);
     const customerEmail = customer.email;
     await supabase
