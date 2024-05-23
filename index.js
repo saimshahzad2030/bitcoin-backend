@@ -52,10 +52,10 @@ app.use("/api", paymentRoutes);
 app.get("/", fetchFoodsApi);
 
 const matcher = {
-  [FREE_TRIAL_ID]: "Free Trial",
-  [GOLD_ID]: "Gold",
-  [SILVER_ID]: "Silver",
-  [BRONZE_ID]: "Bronze",
+  [FREE_TRIAL_ID]: ["Free Trial", 7],
+  [GOLD_ID]: ["Gold", 30],
+  [SILVER_ID]: ["Silver", 30],
+  [BRONZE_ID]: ["Bronze", 30],
 };
 app.post("/webhook", async (req, res) => {
   const sig = req.headers["stripe-signature"];
@@ -88,8 +88,8 @@ app.post("/webhook", async (req, res) => {
       .eq("email", customerEmail);
     await sendEmail(
       customerEmail,
-      (subject = `${matcher[planId]} Subscription Added`),
-      (message = `Dear User you have subscribed ${matcher[planId]} plan Subscription `)
+      (subject = `${matcher[planId][0]} Subscription Added`),
+      (message = `Dear User you have subscribed ${matcher[planId][0]} plan Subscription, which will last till ${matcher[planId][1]} days`)
     );
   }
   if (event.type === "subscription_schedule.expiring") {
