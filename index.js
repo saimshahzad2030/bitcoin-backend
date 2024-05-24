@@ -91,6 +91,13 @@ app.post("/webhook", async (req, res) => {
       (subject = `${matcher[planId][0]} Subscription Added`),
       (message = `Dear User you have subscribed ${matcher[planId][0]} plan Subscription, which will last till ${matcher[planId][1]} days`)
     );
+    setTimeout(async () => {
+      await sendEmailReminder(
+        customerEmail,
+        (subject = `after 2 minutes Subscription Added`),
+        (message = `Dear User you have subscribed plan Subscription, which will last till days`)
+      );
+    }, 2 * 60 * 1000); // 5 minutes in milliseconds
   }
   if (event.type === "subscription_schedule.expiring") {
     const customerEmail = event.data.object.customer_email;
