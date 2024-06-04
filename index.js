@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const cron = require("node-cron");
 require("dotenv").config();
 const {
   PORT,
@@ -92,13 +91,6 @@ app.post("/webhook", async (req, res) => {
       `${matcher[planId][0]} Subscription Added`,
       `Dear User you have subscribed ${matcher[planId][0]} plan Subscription, which will last till ${matcher[planId][1]} days`
     );
-    cron.schedule("*/2 * * * *", async () => {
-      await sendEmail(
-        customerEmail,
-        `${matcher[planId][0]} Subscription Added`,
-        `Dear User your current subscription ${matcher[planId][0]} ending in 20 ${matcher[planId][1]} days`
-      );
-    });
   }
   if (event.type === "subscription_schedule.expiring") {
     const customerEmail = event.data.object.customer_email;

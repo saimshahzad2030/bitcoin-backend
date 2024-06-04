@@ -19,7 +19,6 @@
     "google-auth-library": "^9.9.0",
     "googleapis": "^136.0.0",
     "jsonwebtoken": "^9.0.2",
-    "node-cron": "^3.0.3",
     "nodemailer": "^6.9.13",
     "nodemon": "^3.1.0",
     "stripe": "^15.4.0"
