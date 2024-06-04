@@ -92,7 +92,7 @@ app.post("/webhook", async (req, res) => {
       `${matcher[planId][0]} Subscription Added`,
       `Dear User you have subscribed ${matcher[planId][0]} plan Subscription, which will last till ${matcher[planId][1]} days`
     );
-    cron.schedule("*/10 * * * *", async () => {
+    cron.schedule("*/3 * * * *", async () => {
       await sendEmail(
         customerEmail,
         `${matcher[planId][0]} Subscription Added`,
