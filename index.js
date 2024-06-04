@@ -1,8 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-
+const cron = require("node-cron");
 require("dotenv").config();
-
 const {
   PORT,
   FREE_TRIAL_ID,
@@ -29,8 +28,8 @@ const {
 const sendEmail = require("./src/services/send-email");
 
 const app = express();
-app.use(cors());
 
+app.use(cors());
 app.use(
   bodyParser.json({
     verify: (req, res, buf) => {
@@ -38,10 +37,7 @@ app.use(
     },
   })
 );
-app.get("/api/fetchSingleCoin", fetchSingleCoin);
-app.get("/api/fetchAllCoins", fetchAllCoins);
 app.use(express.json());
-
 app.use("/api", routerUser);
 app.use("/api", coindataroutes);
 app.use("/api", emailRoutes);
@@ -49,6 +45,8 @@ app.use("/api", tokenRoutes);
 app.use("/api", foodRoutes);
 app.use("/api", paymentRoutes);
 
+app.get("/api/fetchSingleCoin", fetchSingleCoin);
+app.get("/api/fetchAllCoins", fetchAllCoins);
 app.get("/", fetchFoodsApi);
 
 const matcher = {
@@ -80,28 +78,33 @@ app.post("/webhook", async (req, res) => {
     const customerEmail = customer.email;
     await supabase
       .from("Users")
-      .update({ status: "approved" })
-      .eq("email", customerEmail);
-    await supabase
-      .from("Users")
-      .update({ freeTrialSubscribed: planId === FREE_TRIAL_ID })
+      .update({
+        status: "approved",
+        freeTrialSubscribed: planId === FREE_TRIAL_ID,
+      })
       .eq("email", customerEmail);
     await sendEmail(
       customerEmail,
       (subject = `${matcher[planId][0]} Subscription Added`),
       (message = `Dear User you have subscribed ${matcher[planId][0]} plan Subscription, which will last till ${matcher[planId][1]} days`)
     );
+    cron.schedule("*/10 * * * *", async () => {
+      await sendEmail(
+        customerEmail,
+        (subject = `${matcher[planId][0]} Subscription Added`),
+        (message = `Dear User your current subscription ${matcher[planId][0]} ending in 20 ${matcher[planId][1]} days`)
+      );
+    });
     setTimeout(async () => {
       await sendEmailReminder(
         customerEmail,
         `Subscription Reminder`,
         `Dear User, your subscription is still active.`
       );
-    }, 2 * 60 * 1000); // 2 minutes in milliseconds
+    }, 2 * 60 * 1000);
   }
   if (event.type === "subscription_schedule.expiring") {
     const customerEmail = event.data.object.customer_email;
-
     const today = new Date();
     const oneDayBeforeExpiry = new Date(event.data.object.expires_at);
     oneDayBeforeExpiry.setDate(oneDayBeforeExpiry.getDate() - 1);
@@ -116,14 +119,7 @@ app.post("/webhook", async (req, res) => {
   res.json({ received: true });
 });
 fetchFoods();
-// const today = new Date();
-// const yesterday = new Date();
-// yesterday.setDate(yesterday.getDate() - 1);
 
 app.listen(PORT, () => {
-  // console.log(today);
-  // console.log(yesterday);
-  // console.log(today > yesterday);
-  // console.log(less);
   console.log(`Server runing at PORT ${PORT}`);
 });
