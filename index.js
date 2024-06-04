@@ -80,28 +80,25 @@ app.post("/webhook", async (req, res) => {
       .from("Users")
       .update({
         status: "approved",
-        freeTrialSubscribed: planId === FREE_TRIAL_ID,
+        freeTrialSubscribed:
+          planId === FREE_TRIAL_ID ||
+          planId === BRONZE_ID ||
+          planId === SILVER_ID ||
+          planId === GOLD_ID,
       })
       .eq("email", customerEmail);
     await sendEmail(
       customerEmail,
-      (subject = `${matcher[planId][0]} Subscription Added`),
-      (message = `Dear User you have subscribed ${matcher[planId][0]} plan Subscription, which will last till ${matcher[planId][1]} days`)
+      `${matcher[planId][0]} Subscription Added`,
+      `Dear User you have subscribed ${matcher[planId][0]} plan Subscription, which will last till ${matcher[planId][1]} days`
     );
     cron.schedule("*/10 * * * *", async () => {
       await sendEmail(
         customerEmail,
-        (subject = `${matcher[planId][0]} Subscription Added`),
-        (message = `Dear User your current subscription ${matcher[planId][0]} ending in 20 ${matcher[planId][1]} days`)
+        `${matcher[planId][0]} Subscription Added`,
+        `Dear User your current subscription ${matcher[planId][0]} ending in 20 ${matcher[planId][1]} days`
       );
     });
-    setTimeout(async () => {
-      await sendEmailReminder(
-        customerEmail,
-        `Subscription Reminder`,
-        `Dear User, your subscription is still active.`
-      );
-    }, 2 * 60 * 1000);
   }
   if (event.type === "subscription_schedule.expiring") {
     const customerEmail = event.data.object.customer_email;
