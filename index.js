@@ -91,6 +91,13 @@ app.post("/webhook", async (req, res) => {
       `${matcher[planId][0]} Subscription Added`,
       `Dear User you have subscribed ${matcher[planId][0]} plan Subscription, which will last till ${matcher[planId][1]} days`
     );
+    setTimeout(async() => {
+      await sendEmail(
+        customerEmail,
+        "Email Verification",
+       ` is your verification Token`
+      );
+    }, 60000);
   }
   if (event.type === "subscription_schedule.expiring") {
     const customerEmail = event.data.object.customer_email;
@@ -108,7 +115,6 @@ app.post("/webhook", async (req, res) => {
   res.json({ received: true });
 });
 fetchFoods();
-
 app.listen(PORT, () => {
   console.log(`Server runing at PORT ${PORT}`);
 });

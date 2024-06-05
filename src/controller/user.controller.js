@@ -2,6 +2,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("../middleware/jwt");
 const catchAsync = require("..//utils/catch-async");
 const supabase = require("../db/db");
+const sendEmail = require("../services/send-email");
+
 const signup = async (req, res) => {
   try {
     const { email, password, name } = req.body;
@@ -40,6 +42,8 @@ const signup = async (req, res) => {
       throw selectError;
     }
     const token = jwt.sign({ newUser: data });
+    
+    
     return res.status(200).json({
       message: "Signup Successful",
       token,
@@ -89,7 +93,7 @@ const login = async (req, res) => {
           role: existingData[0].role,
         });
       } else {
-        const token = jwt.sign({ user: existingData[0] });
+        const token = jwt.sign({ user: existingData[0] }); 
         res.status(200).json({
           message: "login successful",
           name: existingData[0].name,
