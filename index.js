@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+
+const cron = require('node-cron');
 require("dotenv").config();
 const {
   PORT,
@@ -25,6 +27,7 @@ const {
   fetchAllCoins,
 } = require("./src/controller/Cryptop-Api.controller");
 const sendEmail = require("./src/services/send-email");
+const e = require("express");
 
 const app = express();
 
@@ -53,7 +56,7 @@ const matcher = {
   [GOLD_ID]: ["Gold", 30],
   [SILVER_ID]: ["Silver", 30],
   [BRONZE_ID]: ["Bronze", 30],
-};
+}; 
 app.post("/webhook", async (req, res) => {
   const sig = req.headers["stripe-signature"];
 
@@ -67,14 +70,14 @@ app.post("/webhook", async (req, res) => {
   }
 
   if (event.type === "checkout.session.completed") {
-    console.log("Checkout session completed:", event.data.object);
+    // console.log("Checkout session completed:", event.data.object);
   }
   if (event.type === "customer.subscription.created") {
     const subscription = event.data.object;
     const customerId = subscription.customer;
     const planId = subscription.plan.id;
     const customer = await stripe.customers.retrieve(customerId);
-    const customerEmail = customer.email;
+    const customerEmail = customer.email; 
     await supabase
       .from("Users")
       .update({
@@ -91,30 +94,80 @@ app.post("/webhook", async (req, res) => {
       `${matcher[planId][0]} Subscription Added`,
       `Dear User you have subscribed ${matcher[planId][0]} plan Subscription, which will last till ${matcher[planId][1]} days`
     );
-    setTimeout(async() => {
-      await sendEmail(
-        customerEmail,
-        "Email Verification",
-       ` is your verification Token`
-      );
-    }, 60000);
+     
   }
-  if (event.type === "subscription_schedule.expiring") {
-    const customerEmail = event.data.object.customer_email;
-    const today = new Date();
-    const oneDayBeforeExpiry = new Date(event.data.object.expires_at);
-    oneDayBeforeExpiry.setDate(oneDayBeforeExpiry.getDate() - 1);
-    if (today >= oneDayBeforeExpiry) {
-      await sendEmail(
-        customerEmail,
-        (subject = "Subscription ending Reminder"),
-        (message = `your currently subscribed offer is expiring within 1 day. It's your last day to avail the offe so use our features to maximize your productivity and don't forget to resubscribe our offfer when it ends :)`)
-      );
+  if(event.type === 'customer.subscription.updated'){
+    const subscription = event.data.object;
+    console.log('subscription status after updating: ',subscription)
+
+    // // Check if subscription status is "canceled"
+    // if (subscription.status === 'canceled') {
+    //   // Update user in your database
+    //   console.log('Subscription has ended, updating user in database...');
+    //   // Perform database update operations here
+    // }
+  } 
+      
+  if(event.type === "invoice.payment_succeeded"){
+    const invoice = event.data.object; 
+    const invoiceId = invoice.id;
+    let product_Id;
+
+    try {
+      const lineItems = await stripe.invoices.listLineItems(invoiceId);
+      lineItems.data.forEach(item => {
+        const productId = item.price.id;  
+        product_Id = item.price.id
+      });
+      try {
+        const subscriptions = await stripe.subscriptions.list({
+          customer: invoice.customer,
+          status: 'active', 
+        });
+        await stripe.subscriptions.update(
+          subscriptions.data[0]?.id,
+          { cancel_at_period_end: product_Id===FREE_TRIAL_ID }
+        );
+        if (product_Id === FREE_TRIAL_ID) { 
+          console.log('Subscription ended, updating user in database...');
+        }
+      } catch (error) {
+        console.error("Error canceling subscriptions:", error);
+      }
+      
+    } catch (error) {
+      console.error('Error fetching invoice line items:', error);
     }
+
+  }
+  if(event.type ==="customer.subscription.deleted"){
+    const subscription = event.data.object;
+    const customerId = subscription.customer;
+    const customer = await stripe.customers.retrieve(customerId);
+    const customerEmail = customer.email; 
+    await supabase
+    .from("Users")
+    .update({
+      status: "pending"
+    })
+    .eq("email", customerEmail);
+  }
+  if(event.type === "invoice.payment_failed"){
+    const invoice = event.data.object;
+    const customerId = invoice.customer;
+    const customer = await stripe.customers.retrieve(customerId);
+    const customerEmail = customer.email;
+    await supabase
+    .from("Users")
+    .update({
+      status: "pending"
+    })
+    .eq("email", customerEmail);
   }
   res.json({ received: true });
 });
 fetchFoods();
-app.listen(PORT, () => {
+app.listen(PORT, async() => {
+ 
   console.log(`Server runing at PORT ${PORT}`);
 });
