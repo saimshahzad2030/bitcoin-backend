@@ -24,24 +24,42 @@ const fetchRemainingTime = async (req, res) => {
     const customers = await stripe.customers.list({
       email: req?.user?.user?.email,
     });
-    console.log('customer Id: ',customers?.data[0]?.id)
+    console.log('customer Id: ', customers?.data[0]?.id)
     const anySubscription = await hasSubscription(customers?.data[0]?.id);
-
+console.log('any subscription: ',anySubscription.exist)
     if (
       anySubscription.exist &&
       customers &&
       customers.data &&
       customers.data.length > 0
     ) {
-      console.log('if condition true')
-      const upcomingInvoice = await stripe.invoices.retrieveUpcoming({
+      let upcomingInvoice;
+      try {
+        upcomingInvoice = await stripe.invoices.retrieveUpcoming({
+          customer: customers.data[0].id,
+
+        });
+      } catch (error) {
+        console.error('No upcoming invoice found:', error.message);
+      }
+      const subscriptions = await stripe.subscriptions.list({
         customer: customers.data[0].id,
-      });
-      const date = new Date(upcomingInvoice.period_end * 1000);
-      return res.status(200).json({
-        date,
-        subscription: anySubscription.product.name,
-      });
+        status: 'active',
+      }); 
+      let date; 
+      console.log(subscriptions, 'subscriptions')
+      // console.log(upcomingInvoice, 'upc')
+if (upcomingInvoice) {
+  date = new Date(upcomingInvoice.period_end * 1000);
+} else if (subscriptions.data[0]) {
+  date = new Date(subscriptions.data[0].cancel_at * 1000);
+  
+}  
+return res.status(200).json({
+  date,
+  subscription: anySubscription.product.name,
+});   
+     
     } else {
       return res
         .status(404)
@@ -57,14 +75,14 @@ async function hasSubscription(customerId) {
       customer: customerId,
       status: "active",
     });
-    if(subscriptions.data.length === 0){
+    if (subscriptions.data.length === 0) {
       return {
         exist: false,
         subscriptions: null,
         product: null,
       };
     }
-     
+
     const product = await stripe.products.retrieve(
       subscriptions?.data[0]?.items?.data[0]?.price?.product
     );

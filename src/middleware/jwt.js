@@ -43,7 +43,7 @@ const jwtConfig = {
           if (err) {
             return res.status(520).json({ message: "You are not authorized" });
           }
-          if (user.length === 0) {
+          if (!user) {
             return res.status(520).json({ message: "You are not authorized" });
           } else {
             res.status(200).json({

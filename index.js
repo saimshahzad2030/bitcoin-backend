@@ -99,12 +99,7 @@ app.post("/webhook", async (req, res) => {
     const subscription = event.data.object;
     console.log('subscription status after updating: ',subscription)
 
-    // // Check if subscription status is "canceled"
-    // if (subscription.status === 'canceled') {
-    //   // Update user in your database
-    //   console.log('Subscription has ended, updating user in database...');
-    //   // Perform database update operations here
-    // }
+   
   } 
       
   if(event.type === "invoice.payment_succeeded"){
