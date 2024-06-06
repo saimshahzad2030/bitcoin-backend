@@ -20,9 +20,11 @@ const subscribeController = async (req, res) => {
 
 const fetchRemainingTime = async (req, res) => {
   try {
+    console.log(req?.user?.user?.email)
     const customers = await stripe.customers.list({
       email: req?.user?.user?.email,
     });
+    console.log('customer Id: ',customers?.data[0]?.id)
     const anySubscription = await hasSubscription(customers?.data[0]?.id);
 
     if (
@@ -31,6 +33,7 @@ const fetchRemainingTime = async (req, res) => {
       customers.data &&
       customers.data.length > 0
     ) {
+      console.log('if condition true')
       const upcomingInvoice = await stripe.invoices.retrieveUpcoming({
         customer: customers.data[0].id,
       });
@@ -54,8 +57,16 @@ async function hasSubscription(customerId) {
       customer: customerId,
       status: "active",
     });
+    if(subscriptions.data.length === 0){
+      return {
+        exist: false,
+        subscriptions: null,
+        product: null,
+      };
+    }
+     
     const product = await stripe.products.retrieve(
-      subscriptions.data[0].items.data[0].price.product
+      subscriptions?.data[0]?.items?.data[0]?.price?.product
     );
 
     return {
